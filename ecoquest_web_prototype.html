@@ -1,0 +1,1550 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>EcoQuest — Your Daily Quest for a Greener Planet</title>
+  <!-- Google Fonts: Plus Jakarta Sans & Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap" rel="stylesheet" />
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <!-- Tone.js for subtle interactive audio feedback (optional/muted by default toggle) -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js"></script>
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+            display: ['Plus Jakarta Sans', 'sans-serif'],
+          },
+          colors: {
+            forest: {
+              50: '#f0fdf4',
+              100: '#dcfce7',
+              200: '#bbf7d0',
+              300: '#86efac',
+              400: '#4ade80',
+              500: '#22c55e',
+              600: '#16a34a',
+              700: '#15803d',
+              800: '#166534',
+              900: '#14532d',
+              950: '#052e16',
+            },
+            cream: {
+              50: '#fcfbf7',
+              100: '#f7f4eb',
+              200: '#eee8d6',
+            },
+            earth: {
+              500: '#85583f',
+              600: '#6e4732',
+            }
+          },
+          boxShadow: {
+            'soft': '0 4px 20px -2px rgba(20, 83, 45, 0.06)',
+            'glow': '0 0 20px rgba(34, 197, 94, 0.35)',
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    /* Custom scrollbar and subtle animations */
+    body {
+      background-color: #fcfbf7;
+      color: #14532d;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    @keyframes floatUp {
+      0% { opacity: 1; transform: translateY(0) scale(1); }
+      100% { opacity: 0; transform: translateY(-32px) scale(1.15); }
+    }
+
+    .floating-pts {
+      animation: floatUp 0.9s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+      pointer-events: none;
+    }
+
+    @keyframes scanLaser {
+      0% { top: 8%; }
+      50% { top: 88%; }
+      100% { top: 8%; }
+    }
+
+    .scanner-line {
+      animation: scanLaser 2s ease-in-out infinite;
+    }
+
+    @keyframes popIn {
+      0% { opacity: 0; transform: scale(0.94) translateY(8px); }
+      100% { opacity: 1; transform: scale(1) translateY(0); }
+    }
+
+    .animate-pop-in {
+      animation: popIn 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+
+    /* Hide scrollbar for horizontal nav on mobile */
+    .no-scrollbar::-webkit-scrollbar {
+      display: none;
+    }
+    .no-scrollbar {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col font-sans antialiased selection:bg-forest-200 selection:text-forest-900">
+
+  <!-- Toast Notification Container -->
+  <div id="toast-container" class="fixed bottom-5 right-5 z-50 flex flex-col gap-2.5 max-w-sm w-full pointer-events-none px-4 sm:px-0"></div>
+
+  <!-- Top Navigation & User Profile Header -->
+  <header class="sticky top-0 z-40 bg-white/90 backdrop-blur-md border-b border-forest-100 shadow-soft">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between py-3.5 gap-3">
+        
+        <!-- Brand Logo & Sound Toggle -->
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-3 cursor-pointer" onclick="switchTab('dashboard')">
+            <div class="w-11 h-11 rounded-2xl bg-gradient-to-br from-forest-600 to-forest-900 flex items-center justify-center text-white shadow-md shadow-forest-900/20">
+              <i data-lucide="sprout" class="w-6 h-6 text-forest-200"></i>
+            </div>
+            <div>
+              <div class="flex items-center gap-2">
+                <span class="font-display font-extrabold text-xl tracking-tight text-forest-950">EcoQuest</span>
+                <span class="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-forest-100 text-forest-800 border border-forest-200">Beta MVP</span>
+              </div>
+              <p class="text-xs text-forest-700/80 font-medium hidden sm:block">Your Daily Quest for a Greener Planet</p>
+            </div>
+          </div>
+
+          <!-- Mobile EcoPoints Badge -->
+          <div class="flex items-center gap-2 lg:hidden">
+            <button id="sound-toggle-mobile" onclick="toggleSound()" title="Toggle Sound Effects" class="p-2 rounded-xl bg-cream-100 text-forest-800 hover:bg-forest-100 transition">
+              <i data-lucide="volume-2" class="w-4 h-4 sound-icon"></i>
+            </button>
+            <div class="flex items-center gap-1.5 bg-forest-900 text-white px-3 py-1.5 rounded-full text-xs font-bold shadow-sm">
+              <i data-lucide="sparkles" class="w-3.5 h-3.5 text-amber-300"></i>
+              <span class="eco-points-display">740</span> pts
+            </div>
+          </div>
+        </div>
+
+        <!-- User Profile Progress Widget -->
+        <div class="flex items-center gap-4 bg-cream-100/90 border border-forest-100 rounded-2xl px-4 py-2.5 lg:min-w-[360px]">
+          <div class="relative shrink-0">
+            <div class="w-10 h-10 rounded-full bg-gradient-to-tr from-forest-700 to-emerald-500 flex items-center justify-center text-white font-display font-bold text-sm shadow-inner">
+              AR
+            </div>
+            <span id="level-emoji-badge" class="absolute -bottom-1 -right-1 text-sm bg-white rounded-full w-5 h-5 flex items-center justify-center shadow-sm border border-forest-100">🌿</span>
+          </div>
+
+          <div class="flex-1 min-w-0">
+            <div class="flex items-center justify-between text-xs mb-1">
+              <div class="flex items-center gap-1.5 truncate">
+                <span class="font-bold text-forest-950 truncate">Aarav Sharma</span>
+                <span class="text-forest-400">•</span>
+                <span id="level-name-display" class="font-bold text-forest-700 bg-forest-100 px-2 py-0.5 rounded-md">Lvl 3: Sapling</span>
+              </div>
+              <span class="font-extrabold text-forest-900 ml-2 shrink-0">
+                <span class="eco-points-display">740</span> / <span id="next-level-pts-display">1000</span> pts
+              </span>
+            </div>
+            <!-- Progress bar -->
+            <div class="w-full h-2.5 bg-forest-200/70 rounded-full overflow-hidden p-0.5">
+              <div id="level-progress-bar" class="h-full bg-gradient-to-r from-forest-500 to-emerald-600 rounded-full transition-all duration-500 ease-out" style="width: 74%;"></div>
+            </div>
+            <div class="flex justify-between items-center mt-1 text-[11px] text-forest-700/80">
+              <span id="pts-to-next-text">260 pts to reach <strong>Tree 🌳</strong></span>
+              <span class="font-semibold text-forest-700">🔥 6-Day Streak</span>
+            </div>
+          </div>
+
+          <button id="sound-toggle-desktop" onclick="toggleSound()" title="Toggle Sound Effects" class="hidden lg:flex p-2 rounded-xl bg-white text-forest-800 hover:bg-forest-100 border border-forest-100 transition shrink-0">
+            <i data-lucide="volume-2" class="w-4 h-4 sound-icon"></i>
+          </button>
+        </div>
+
+      </div>
+
+      <!-- Navigation Tabs -->
+      <nav class="flex items-center gap-1.5 overflow-x-auto no-scrollbar pb-2.5 pt-1" aria-label="Main Navigation">
+        <button onclick="switchTab('dashboard')" id="tab-dashboard" class="nav-tab flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold transition-all whitespace-nowrap bg-forest-900 text-white shadow-sm">
+          <i data-lucide="layout-dashboard" class="w-4 h-4"></i>
+          <span>Impact Dashboard</span>
+        </button>
+        <button onclick="switchTab('plants')" id="tab-plants" class="nav-tab flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold transition-all whitespace-nowrap text-forest-800 hover:bg-forest-100/70">
+          <i data-lucide="flower-2" class="w-4 h-4"></i>
+          <span>My Plants Tracker</span>
+          <span id="plants-due-badge" class="ml-0.5 bg-amber-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full">2</span>
+        </button>
+        <button onclick="switchTab('scanner')" id="tab-scanner" class="nav-tab flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold transition-all whitespace-nowrap text-forest-800 hover:bg-forest-100/70">
+          <i data-lucide="scan-line" class="w-4 h-4"></i>
+          <span>AI Waste Scanner & Guide</span>
+        </button>
+        <button onclick="switchTab('community')" id="tab-community" class="nav-tab flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold transition-all whitespace-nowrap text-forest-800 hover:bg-forest-100/70">
+          <i data-lucide="trophy" class="w-4 h-4"></i>
+          <span>Quests & Community</span>
+        </button>
+      </nav>
+    </div>
+  </header>
+
+  <!-- Main Content Container -->
+  <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
+
+    <!-- ===================================================================== -->
+    <!-- TAB 1: SUSTAINABLE ACTIONS & WASTE TRACKING DASHBOARD                 -->
+    <!-- ===================================================================== -->
+    <section id="view-dashboard" class="tab-view space-y-6 animate-pop-in">
+      
+      <!-- Daily Eco-Tip Banner -->
+      <div class="bg-gradient-to-r from-forest-900 via-forest-800 to-emerald-900 rounded-3xl p-5 sm:p-6 text-white shadow-soft relative overflow-hidden">
+        <div class="absolute right-0 top-0 opacity-10 pointer-events-none transform translate-x-6 -translate-y-4">
+          <i data-lucide="globe-2" class="w-44 h-44"></i>
+        </div>
+        <div class="relative z-10 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div class="space-y-1 max-w-2xl">
+            <div class="inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-forest-200 bg-white/10 px-3 py-1 rounded-full">
+              <i data-lucide="lightbulb" class="w-3.5 h-3.5 text-amber-300"></i>
+              <span>Daily Eco-Insight</span>
+            </div>
+            <h1 class="font-display text-xl sm:text-2xl font-bold tracking-tight">Welcome back, Aarav! Ready to grow your impact today?</h1>
+            <p class="text-sm text-forest-100/90">Composting food scraps instead of sending them to landfills cuts methane emissions by over 50%. Log your actions below to earn EcoPoints!</p>
+          </div>
+          <button onclick="openShareModal('Level 3 Sapling Milestone', 'I have saved 18.4 kg of CO₂ and avoided 9.2 kg of landfill waste on EcoQuest!')" class="shrink-0 inline-flex items-center justify-center gap-2 bg-white text-forest-950 hover:bg-forest-50 font-bold text-sm px-4 py-3 rounded-2xl shadow-md transition active:scale-95">
+            <i data-lucide="share-2" class="w-4 h-4 text-forest-700"></i>
+            <span>Share Impact Card</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Real-Time Environmental Impact Metrics -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <!-- Metric 1: EcoPoints -->
+        <div class="bg-white rounded-3xl p-5 border border-forest-100 shadow-soft flex items-center justify-between">
+          <div>
+            <p class="text-xs font-semibold uppercase tracking-wider text-forest-600">Total EcoPoints</p>
+            <p class="font-display text-3xl font-extrabold text-forest-950 mt-1 eco-points-display">740</p>
+            <p class="text-xs text-emerald-600 font-semibold mt-1 flex items-center gap-1">
+              <i data-lucide="trending-up" class="w-3.5 h-3.5"></i> +115 pts this week
+            </p>
+          </div>
+          <div class="w-12 h-12 rounded-2xl bg-amber-50 border border-amber-200/70 flex items-center justify-center text-amber-500">
+            <i data-lucide="sparkles" class="w-6 h-6"></i>
+          </div>
+        </div>
+
+        <!-- Metric 2: CO2 Saved -->
+        <div class="bg-white rounded-3xl p-5 border border-forest-100 shadow-soft flex items-center justify-between">
+          <div>
+            <p class="text-xs font-semibold uppercase tracking-wider text-forest-600">CO₂ Emissions Saved</p>
+            <p class="font-display text-3xl font-extrabold text-forest-950 mt-1"><span id="metric-co2">18.4</span> <span class="text-base font-bold text-forest-600">kg</span></p>
+            <p class="text-xs text-forest-600/80 mt-1">≈ Planting 0.9 mature trees</p>
+          </div>
+          <div class="w-12 h-12 rounded-2xl bg-forest-50 border border-forest-200/70 flex items-center justify-center text-forest-600">
+            <i data-lucide="cloud-sun" class="w-6 h-6"></i>
+          </div>
+        </div>
+
+        <!-- Metric 3: Landfill Waste Avoided -->
+        <div class="bg-white rounded-3xl p-5 border border-forest-100 shadow-soft flex items-center justify-between">
+          <div>
+            <p class="text-xs font-semibold uppercase tracking-wider text-forest-600">Landfill Waste Avoided</p>
+            <p class="font-display text-3xl font-extrabold text-forest-950 mt-1"><span id="metric-waste">9.2</span> <span class="text-base font-bold text-forest-600">kg</span></p>
+            <p class="text-xs text-forest-600/80 mt-1">Diverted via recycling & compost</p>
+          </div>
+          <div class="w-12 h-12 rounded-2xl bg-emerald-50 border border-emerald-200/70 flex items-center justify-center text-emerald-600">
+            <i data-lucide="recycle" class="w-6 h-6"></i>
+          </div>
+        </div>
+
+        <!-- Metric 4: Water Saved -->
+        <div class="bg-white rounded-3xl p-5 border border-forest-100 shadow-soft flex items-center justify-between">
+          <div>
+            <p class="text-xs font-semibold uppercase tracking-wider text-forest-600">Clean Water Saved</p>
+            <p class="font-display text-3xl font-extrabold text-forest-950 mt-1"><span id="metric-water">340</span> <span class="text-base font-bold text-forest-600">L</span></p>
+            <p class="text-xs text-forest-600/80 mt-1">Shorter showers & mindful use</p>
+          </div>
+          <div class="w-12 h-12 rounded-2xl bg-sky-50 border border-sky-200/70 flex items-center justify-center text-sky-600">
+            <i data-lucide="droplets" class="w-6 h-6"></i>
+          </div>
+        </div>
+      </div>
+
+      <!-- Quick-Log Sustainable Actions Grid -->
+      <div class="bg-white rounded-3xl p-6 border border-forest-100 shadow-soft">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-5">
+          <div>
+            <h2 class="font-display text-lg sm:text-xl font-bold text-forest-950 flex items-center gap-2">
+              <i data-lucide="zap" class="w-5 h-5 text-amber-500"></i>
+              <span>Quick-Log Sustainable Action</span>
+            </h2>
+            <p class="text-sm text-forest-700/80">Tap an eco-friendly habit you completed today to earn EcoPoints and update your live metrics.</p>
+          </div>
+          <span class="text-xs font-semibold text-forest-700 bg-forest-50 border border-forest-200 px-3 py-1.5 rounded-xl self-start sm:self-auto">
+            Instant Impact Sync
+          </span>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3.5">
+          <!-- Action 1 -->
+          <button onclick="logAction(this, 'Used Reusable Cup', 15, 0.2, 0.05, 2)" class="group relative flex flex-col justify-between p-4 rounded-2xl bg-cream-50 hover:bg-forest-50 border-2 border-forest-100 hover:border-forest-500 text-left transition-all active:scale-95">
+            <div class="flex items-start justify-between w-full mb-3">
+              <div class="w-10 h-10 rounded-xl bg-amber-100 text-amber-700 flex items-center justify-center group-hover:scale-110 transition-transform">
+                <i data-lucide="coffee" class="w-5 h-5"></i>
+              </div>
+              <span class="text-xs font-extrabold text-forest-800 bg-forest-200/80 px-2.5 py-1 rounded-full">+15 pts</span>
+            </div>
+            <div>
+              <h3 class="font-bold text-sm text-forest-950">Used Reusable Cup</h3>
+              <p class="text-xs text-forest-600 mt-0.5">-0.2 kg CO₂ • -0.05 kg waste</p>
+            </div>
+          </button>
+
+          <!-- Action 2 -->
+          <button onclick="logAction(this, 'Composted Food Scraps', 25, 0.8, 0.6, 5)" class="group relative flex flex-col justify-between p-4 rounded-2xl bg-cream-50 hover:bg-forest-50 border-2 border-forest-100 hover:border-forest-500 text-left transition-all active:scale-95">
+            <div class="flex items-start justify-between w-full mb-3">
+              <div class="w-10 h-10 rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center group-hover:scale-110 transition-transform">
+                <i data-lucide="leaf" class="w-5 h-5"></i>
+              </div>
+              <span class="text-xs font-extrabold text-forest-800 bg-forest-200/80 px-2.5 py-1 rounded-full">+25 pts</span>
+            </div>
+            <div>
+              <h3 class="font-bold text-sm text-forest-950">Composted Food Scraps</h3>
+              <p class="text-xs text-forest-600 mt-0.5">-0.8 kg CO₂ • -0.6 kg waste</p>
+            </div>
+          </button>
+
+          <!-- Action 3 -->
+          <button onclick="logAction(this, 'Recycled Plastic/Paper', 20, 0.5, 0.4, 8)" class="group relative flex flex-col justify-between p-4 rounded-2xl bg-cream-50 hover:bg-forest-50 border-2 border-forest-100 hover:border-forest-500 text-left transition-all active:scale-95">
+            <div class="flex items-start justify-between w-full mb-3">
+              <div class="w-10 h-10 rounded-xl bg-teal-100 text-teal-700 flex items-center justify-center group-hover:scale-110 transition-transform">
+                <i data-lucide="recycle" class="w-5 h-5"></i>
+              </div>
+              <span class="text-xs font-extrabold text-forest-800 bg-forest-200/80 px-2.5 py-1 rounded-full">+20 pts</span>
+            </div>
+            <div>
+              <h3 class="font-bold text-sm text-forest-950">Recycled Plastic/Paper</h3>
+              <p class="text-xs text-forest-600 mt-0.5">-0.5 kg CO₂ • -0.4 kg waste</p>
+            </div>
+          </button>
+
+          <!-- Action 4 -->
+          <button onclick="logAction(this, 'Shorter Shower (<5 min)', 15, 0.4, 0.0, 35)" class="group relative flex flex-col justify-between p-4 rounded-2xl bg-cream-50 hover:bg-forest-50 border-2 border-forest-100 hover:border-forest-500 text-left transition-all active:scale-95">
+            <div class="flex items-start justify-between w-full mb-3">
+              <div class="w-10 h-10 rounded-xl bg-sky-100 text-sky-700 flex items-center justify-center group-hover:scale-110 transition-transform">
+                <i data-lucide="droplet" class="w-5 h-5"></i>
+              </div>
+              <span class="text-xs font-extrabold text-forest-800 bg-forest-200/80 px-2.5 py-1 rounded-full">+15 pts</span>
+            </div>
+            <div>
+              <h3 class="font-bold text-sm text-forest-950">Shorter Shower</h3>
+              <p class="text-xs text-forest-600 mt-0.5">-0.4 kg CO₂ • +35 L water saved</p>
+            </div>
+          </button>
+
+          <!-- Action 5 -->
+          <button onclick="logAction(this, 'Walked/Biked Instead of Drove', 30, 1.8, 0.0, 0)" class="group relative flex flex-col justify-between p-4 rounded-2xl bg-cream-50 hover:bg-forest-50 border-2 border-forest-100 hover:border-forest-500 text-left transition-all active:scale-95">
+            <div class="flex items-start justify-between w-full mb-3">
+              <div class="w-10 h-10 rounded-xl bg-lime-100 text-lime-700 flex items-center justify-center group-hover:scale-110 transition-transform">
+                <i data-lucide="bike" class="w-5 h-5"></i>
+              </div>
+              <span class="text-xs font-extrabold text-forest-800 bg-forest-200/80 px-2.5 py-1 rounded-full">+30 pts</span>
+            </div>
+            <div>
+              <h3 class="font-bold text-sm text-forest-950">Walked/Biked Commute</h3>
+              <p class="text-xs text-forest-600 mt-0.5">-1.8 kg CO₂ • Zero tailpipe</p>
+            </div>
+          </button>
+        </div>
+      </div>
+
+      <!-- Weekly Impact Chart & Recent Activity Log -->
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        
+        <!-- Weekly Impact Bar Chart -->
+        <div class="lg:col-span-2 bg-white rounded-3xl p-6 border border-forest-100 shadow-soft flex flex-col justify-between">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-6">
+            <div>
+              <h3 class="font-display text-lg font-bold text-forest-950">Weekly EcoPoints & Waste Reduction</h3>
+              <p class="text-xs text-forest-600">Your daily sustainability momentum over the last 7 days</p>
+            </div>
+            <div class="flex items-center gap-3 text-xs font-semibold">
+              <span class="flex items-center gap-1.5 text-forest-800"><span class="w-3 h-3 rounded-sm bg-forest-600 inline-block"></span> EcoPoints</span>
+              <span class="flex items-center gap-1.5 text-emerald-700"><span class="w-3 h-3 rounded-sm bg-emerald-300 inline-block"></span> Today (Live)</span>
+            </div>
+          </div>
+
+          <!-- Responsive Bar Chart Container -->
+          <div id="weekly-chart" class="h-52 flex items-end justify-between gap-2 sm:gap-4 pt-6 pb-2 px-2 border-b border-forest-100">
+            <!-- Bars rendered dynamically via JS -->
+          </div>
+          <div class="flex justify-between text-xs font-semibold text-forest-600 pt-3 px-2">
+            <span>Mon</span>
+            <span>Tue</span>
+            <span>Wed</span>
+            <span>Thu</span>
+            <span>Fri</span>
+            <span>Sat</span>
+            <span class="text-forest-950 font-bold">Today</span>
+          </div>
+        </div>
+
+        <!-- Recent Action History -->
+        <div class="bg-white rounded-3xl p-6 border border-forest-100 shadow-soft flex flex-col">
+          <div class="flex items-center justify-between mb-4">
+            <h3 class="font-display text-lg font-bold text-forest-950">Recent Eco-Logs</h3>
+            <span class="text-xs font-semibold text-forest-600 bg-cream-100 px-2.5 py-1 rounded-lg">Live Feed</span>
+          </div>
+          <ul id="recent-logs-list" class="space-y-3 flex-1 overflow-y-auto max-h-64 pr-1">
+            <li class="flex items-center justify-between p-3 rounded-2xl bg-cream-50 border border-forest-100/80 text-sm">
+              <div class="flex items-center gap-3">
+                <span class="w-8 h-8 rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center shrink-0"><i data-lucide="leaf" class="w-4 h-4"></i></span>
+                <div>
+                  <p class="font-semibold text-forest-950">Composted Food Scraps</p>
+                  <p class="text-[11px] text-forest-600">Today, 8:15 AM</p>
+                </div>
+              </div>
+              <span class="font-bold text-xs text-forest-700 bg-forest-100 px-2 py-1 rounded-lg">+25 pts</span>
+            </li>
+            <li class="flex items-center justify-between p-3 rounded-2xl bg-cream-50 border border-forest-100/80 text-sm">
+              <div class="flex items-center gap-3">
+                <span class="w-8 h-8 rounded-xl bg-amber-100 text-amber-700 flex items-center justify-center shrink-0"><i data-lucide="coffee" class="w-4 h-4"></i></span>
+                <div>
+                  <p class="font-semibold text-forest-950">Used Reusable Cup</p>
+                  <p class="text-[11px] text-forest-600">Yesterday, 4:30 PM</p>
+                </div>
+              </div>
+              <span class="font-bold text-xs text-forest-700 bg-forest-100 px-2 py-1 rounded-lg">+15 pts</span>
+            </li>
+            <li class="flex items-center justify-between p-3 rounded-2xl bg-cream-50 border border-forest-100/80 text-sm">
+              <div class="flex items-center gap-3">
+                <span class="w-8 h-8 rounded-xl bg-lime-100 text-lime-700 flex items-center justify-center shrink-0"><i data-lucide="bike" class="w-4 h-4"></i></span>
+                <div>
+                  <p class="font-semibold text-forest-950">Walked/Biked Commute</p>
+                  <p class="text-[11px] text-forest-600">Yesterday, 9:00 AM</p>
+                </div>
+              </div>
+              <span class="font-bold text-xs text-forest-700 bg-forest-100 px-2 py-1 rounded-lg">+30 pts</span>
+            </li>
+          </ul>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ===================================================================== -->
+    <!-- TAB 2: MY PLANTS TRACKER                                              -->
+    <!-- ===================================================================== -->
+    <section id="view-plants" class="tab-view hidden space-y-6 animate-pop-in">
+      
+      <!-- Header & Add Plant CTA -->
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white rounded-3xl p-6 border border-forest-100 shadow-soft">
+        <div>
+          <div class="inline-flex items-center gap-1.5 text-xs font-bold text-forest-700 bg-forest-100 px-2.5 py-1 rounded-full mb-2">
+            <i data-lucide="sprout" class="w-3.5 h-3.5"></i>
+            <span>Real-World Green Nurturing</span>
+          </div>
+          <h2 class="font-display text-2xl font-bold text-forest-950">My Plants Sanctuary</h2>
+          <p class="text-sm text-forest-700/80 mt-0.5">Care for your real-life houseplants & herbs. Watering on schedule earns <strong class="text-forest-900">+10 EcoPoints</strong> and boosts plant growth!</p>
+        </div>
+        <button onclick="toggleAddPlantModal(true)" class="inline-flex items-center justify-center gap-2 bg-forest-800 hover:bg-forest-900 text-white font-bold text-sm px-5 py-3.5 rounded-2xl shadow-md transition active:scale-95 shrink-0">
+          <i data-lucide="plus-circle" class="w-4 h-4"></i>
+          <span>Add New Plant</span>
+        </button>
+      </div>
+
+      <!-- Plant Cards Grid -->
+      <div id="plants-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <!-- Rendered dynamically by JS -->
+      </div>
+
+    </section>
+
+    <!-- ===================================================================== -->
+    <!-- TAB 3: AI WASTE SCANNER & DISPOSAL GUIDE                              -->
+    <!-- ===================================================================== -->
+    <section id="view-scanner" class="tab-view hidden space-y-6 animate-pop-in">
+      
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        
+        <!-- Left Column: AI Camera Scanner Simulation -->
+        <div class="lg:col-span-5 bg-white rounded-3xl p-6 border border-forest-100 shadow-soft flex flex-col justify-between">
+          <div>
+            <div class="flex items-center justify-between mb-3">
+              <span class="inline-flex items-center gap-1.5 text-xs font-bold text-emerald-800 bg-emerald-100 px-3 py-1 rounded-full">
+                <i data-lucide="cpu" class="w-3.5 h-3.5"></i> Vertex AI Vision Powered
+              </span>
+              <span class="text-xs font-semibold text-forest-600">+15 pts per scan</span>
+            </div>
+            <h2 class="font-display text-xl font-bold text-forest-950">"What Goes Where?" AI Scanner</h2>
+            <p class="text-sm text-forest-700/80 mt-1">Snap or upload a photo of any household item to identify its material and get hyper-local disposal rules.</p>
+          </div>
+
+          <!-- Simulated Camera Viewfinder -->
+          <div id="scanner-viewport" class="my-5 relative rounded-2xl bg-forest-950 aspect-[4/3] overflow-hidden flex flex-col items-center justify-center text-center p-6 border-2 border-forest-800 shadow-inner">
+            <!-- Corner Reticles -->
+            <div class="absolute top-3 left-3 w-6 h-6 border-t-2 border-l-2 border-forest-400 rounded-tl-lg"></div>
+            <div class="absolute top-3 right-3 w-6 h-6 border-t-2 border-r-2 border-forest-400 rounded-tr-lg"></div>
+            <div class="absolute bottom-3 left-3 w-6 h-6 border-b-2 border-l-2 border-forest-400 rounded-bl-lg"></div>
+            <div class="absolute bottom-3 right-3 w-6 h-6 border-b-2 border-r-2 border-forest-400 rounded-br-lg"></div>
+
+            <!-- Animated Laser Line (Hidden until scanning) -->
+            <div id="scanner-laser" class="hidden scanner-line absolute left-4 right-4 h-0.5 bg-emerald-400 shadow-[0_0_12px_#34d399] z-20"></div>
+
+            <div id="scanner-idle-state" class="space-y-3 z-10">
+              <div class="w-14 h-14 rounded-2xl bg-white/10 text-forest-300 flex items-center justify-center mx-auto backdrop-blur-sm">
+                <i data-lucide="camera" class="w-7 h-7"></i>
+              </div>
+              <p class="text-sm font-semibold text-white">Ready to Identify Item</p>
+              <p class="text-xs text-forest-300 max-w-xs mx-auto">Upload an image or run a live AI demo scan on a sample item.</p>
+            </div>
+
+            <div id="scanner-active-state" class="hidden space-y-3 z-10">
+              <div class="text-5xl animate-bounce" id="scanning-emoji">🥤</div>
+              <p class="text-sm font-bold text-emerald-300 tracking-wide uppercase">Analyzing Polymer & Residue...</p>
+              <p class="text-xs text-forest-200">Matching municipal recycling guidelines</p>
+            </div>
+          </div>
+
+          <!-- Upload / Simulate Scan Controls -->
+          <div class="space-y-2.5">
+            <label class="w-full cursor-pointer inline-flex items-center justify-center gap-2 bg-forest-800 hover:bg-forest-900 text-white font-bold text-sm px-4 py-3.5 rounded-2xl shadow-md transition active:scale-95">
+              <i data-lucide="upload" class="w-4 h-4"></i>
+              <span>Upload Item Photo for AI Scan</span>
+              <input type="file" accept="image/*" class="hidden" onchange="triggerSimulatedPhotoScan()" />
+            </label>
+            <button onclick="triggerSimulatedPhotoScan()" class="w-full inline-flex items-center justify-center gap-2 bg-cream-100 hover:bg-forest-100 text-forest-900 font-bold text-sm px-4 py-3 rounded-2xl border border-forest-200 transition">
+              <i data-lucide="sparkles" class="w-4 h-4 text-amber-500"></i>
+              <span>Run Instant Demo Camera Scan</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Right Column: Smart Search & AI Result Card -->
+        <div class="lg:col-span-7 space-y-6">
+          
+          <!-- Search & Quick Sample Chips -->
+          <div class="bg-white rounded-3xl p-6 border border-forest-100 shadow-soft">
+            <h3 class="font-display text-lg font-bold text-forest-950 mb-3">Smart Disposal & Recycling Search</h3>
+            <div class="relative">
+              <i data-lucide="search" class="w-5 h-5 text-forest-500 absolute left-4 top-1/2 -translate-y-1/2"></i>
+              <input
+                id="waste-search-input"
+                type="text"
+                placeholder="Search any item (e.g., Old Smartphone, Greasy Pizza Box, Cooking Oil...)"
+                oninput="handleWasteSearch(this.value)"
+                class="w-full pl-12 pr-4 py-3.5 rounded-2xl bg-cream-50 border border-forest-200 focus:border-forest-600 focus:ring-2 focus:ring-forest-200 outline-none text-sm font-medium text-forest-950 transition"
+              />
+            </div>
+
+            <div class="mt-4">
+              <p class="text-xs font-bold uppercase tracking-wider text-forest-600 mb-2.5">Try Quick Sample Items:</p>
+              <div class="flex flex-wrap gap-2">
+                <button onclick="selectWasteItem('Old Smartphone')" class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-cream-100 hover:bg-forest-100 text-forest-900 text-xs font-bold border border-forest-200/80 transition">
+                  <span>📱</span> Old Smartphone
+                </button>
+                <button onclick="selectWasteItem('Greasy Pizza Box')" class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-cream-100 hover:bg-forest-100 text-forest-900 text-xs font-bold border border-forest-200/80 transition">
+                  <span>🍕</span> Greasy Pizza Box
+                </button>
+                <button onclick="selectWasteItem('Cooking Oil')" class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-cream-100 hover:bg-forest-100 text-forest-900 text-xs font-bold border border-forest-200/80 transition">
+                  <span>🫗</span> Cooking Oil
+                </button>
+                <button onclick="selectWasteItem('PET Plastic Bottle')" class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-cream-100 hover:bg-forest-100 text-forest-900 text-xs font-bold border border-forest-200/80 transition">
+                  <span>🧴</span> PET Plastic Bottle
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- AI Classification Output Card -->
+          <div id="waste-result-card" class="bg-white rounded-3xl p-6 border-2 border-forest-200 shadow-soft transition-all">
+            <!-- Populated dynamically -->
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================================================================== -->
+    <!-- TAB 4: GAMIFICATION, QUESTS & COMMUNITY FEED                          -->
+    <!-- ===================================================================== -->
+    <section id="view-community" class="tab-view hidden space-y-6 animate-pop-in">
+      
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        
+        <!-- Left 5 Cols: Daily Quests, Badges & Leaderboard -->
+        <div class="lg:col-span-5 space-y-6">
+          
+          <!-- Active Daily & Weekly Quests -->
+          <div class="bg-white rounded-3xl p-6 border border-forest-100 shadow-soft">
+            <div class="flex items-center justify-between mb-4">
+              <div>
+                <h2 class="font-display text-lg font-bold text-forest-950">Active Eco-Quests</h2>
+                <p class="text-xs text-forest-600">Complete challenges for bonus EcoPoints</p>
+              </div>
+              <span class="text-xs font-bold bg-amber-100 text-amber-800 px-2.5 py-1 rounded-full">Resets in 14h</span>
+            </div>
+
+            <div id="quests-list" class="space-y-3">
+              <!-- Rendered dynamically -->
+            </div>
+          </div>
+
+          <!-- Badges Showcase -->
+          <div class="bg-white rounded-3xl p-6 border border-forest-100 shadow-soft">
+            <div class="flex items-center justify-between mb-4">
+              <h2 class="font-display text-lg font-bold text-forest-950">Eco-Warrior Badges</h2>
+              <span class="text-xs font-bold text-forest-700">3 / 6 Unlocked</span>
+            </div>
+            <div class="grid grid-cols-3 gap-3">
+              <!-- Unlocked 1 -->
+              <div class="p-3 rounded-2xl bg-forest-50 border border-forest-200 text-center">
+                <div class="text-2xl mb-1">♻️</div>
+                <p class="text-xs font-bold text-forest-950 leading-tight">Zero-Waste Starter</p>
+                <span class="text-[10px] font-semibold text-forest-600">Unlocked</span>
+              </div>
+              <!-- Unlocked 2 -->
+              <div class="p-3 rounded-2xl bg-amber-50 border border-amber-200 text-center">
+                <div class="text-2xl mb-1">🌱</div>
+                <p class="text-xs font-bold text-forest-950 leading-tight">Plant Parent</p>
+                <span class="text-[10px] font-semibold text-amber-700">Unlocked</span>
+              </div>
+              <!-- Unlocked 3 -->
+              <div class="p-3 rounded-2xl bg-sky-50 border border-sky-200 text-center">
+                <div class="text-2xl mb-1">💧</div>
+                <p class="text-xs font-bold text-forest-950 leading-tight">Water Guardian</p>
+                <span class="text-[10px] font-semibold text-sky-700">Unlocked</span>
+              </div>
+              <!-- Locked 4 -->
+              <div class="p-3 rounded-2xl bg-cream-100/70 border border-dashed border-forest-200 text-center opacity-60">
+                <div class="text-2xl mb-1 grayscale">🏆</div>
+                <p class="text-xs font-bold text-forest-800 leading-tight">Compost Champion</p>
+                <span class="text-[10px] font-semibold text-forest-500">Locked</span>
+              </div>
+              <!-- Locked 5 -->
+              <div class="p-3 rounded-2xl bg-cream-100/70 border border-dashed border-forest-200 text-center opacity-60">
+                <div class="text-2xl mb-1 grayscale">🚲</div>
+                <p class="text-xs font-bold text-forest-800 leading-tight">Carbon Crusher</p>
+                <span class="text-[10px] font-semibold text-forest-500">Locked</span>
+              </div>
+              <!-- Locked 6 -->
+              <div class="p-3 rounded-2xl bg-cream-100/70 border border-dashed border-forest-200 text-center opacity-60">
+                <div class="text-2xl mb-1 grayscale">🌳</div>
+                <p class="text-xs font-bold text-forest-800 leading-tight">Forest Guardian</p>
+                <span class="text-[10px] font-semibold text-forest-500">1,000 pts</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Local Leaderboard -->
+          <div class="bg-white rounded-3xl p-6 border border-forest-100 shadow-soft">
+            <div class="flex items-center justify-between mb-4">
+              <h2 class="font-display text-lg font-bold text-forest-950">Neighborhood Leaderboard</h2>
+              <span class="text-xs font-semibold text-forest-600">This Week</span>
+            </div>
+            <div id="leaderboard-list" class="space-y-2.5">
+              <!-- Rendered dynamically -->
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Right 7 Cols: Community Eco-Feed -->
+        <div class="lg:col-span-7 space-y-5">
+          
+          <!-- Create Post Composer -->
+          <div class="bg-white rounded-3xl p-5 border border-forest-100 shadow-soft">
+            <h2 class="font-display text-lg font-bold text-forest-950 mb-3">Community Eco-Feed</h2>
+            <div class="flex gap-3">
+              <div class="w-10 h-10 rounded-full bg-forest-800 text-white font-bold text-sm flex items-center justify-center shrink-0">AR</div>
+              <div class="flex-1 space-y-3">
+                <textarea id="new-post-input" rows="2" placeholder="Share a sustainable win, composting tip, or plant update with the community..." class="w-full p-3 rounded-2xl bg-cream-50 border border-forest-200 focus:border-forest-600 outline-none text-sm text-forest-950 resize-none"></textarea>
+                <div class="flex items-center justify-between">
+                  <span class="text-xs text-forest-600 font-medium">Posting earns <strong class="text-forest-800">+10 EcoPoints</strong></span>
+                  <button onclick="createCommunityPost()" class="inline-flex items-center gap-1.5 bg-forest-800 hover:bg-forest-900 text-white font-bold text-xs px-4 py-2.5 rounded-xl transition active:scale-95">
+                    <i data-lucide="send" class="w-3.5 h-3.5"></i>
+                    <span>Post Update</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Feed Posts Stream -->
+          <div id="eco-feed-list" class="space-y-4">
+            <!-- Rendered dynamically -->
+          </div>
+
+        </div>
+
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ===================================================================== -->
+  <!-- MODAL 1: ADD NEW PLANT                                                -->
+  <!-- ===================================================================== -->
+  <div id="add-plant-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-forest-950/60 backdrop-blur-sm p-4">
+    <div class="bg-white rounded-3xl max-w-md w-full p-6 border border-forest-100 shadow-2xl animate-pop-in">
+      <div class="flex items-center justify-between mb-4">
+        <h3 class="font-display text-xl font-bold text-forest-950">Add a New Plant</h3>
+        <button onclick="toggleAddPlantModal(false)" class="p-2 rounded-xl text-forest-600 hover:bg-cream-100">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+      <form onsubmit="handleAddPlant(event)" class="space-y-4">
+        <div>
+          <label class="block text-xs font-bold uppercase tracking-wider text-forest-700 mb-1.5">Plant Nickname</label>
+          <input id="plant-name-input" type="text" required placeholder="e.g., Fernie Sanders" class="w-full px-4 py-3 rounded-xl bg-cream-50 border border-forest-200 focus:border-forest-600 outline-none text-sm font-medium" />
+        </div>
+        <div>
+          <label class="block text-xs font-bold uppercase tracking-wider text-forest-700 mb-1.5">Species / Type</label>
+          <select id="plant-species-input" class="w-full px-4 py-3 rounded-xl bg-cream-50 border border-forest-200 focus:border-forest-600 outline-none text-sm font-medium">
+            <option value="Monstera Deliciosa|🌿">Monstera Deliciosa 🌿</option>
+            <option value="Sweet Basil Herb|🌱">Sweet Basil Herb 🌱</option>
+            <option value="Snake Plant|🪴">Snake Plant 🪴</option>
+            <option value="Cherry Tomato|🍅">Cherry Tomato 🍅</option>
+            <option value="Peace Lily|🌸">Peace Lily 🌸</option>
+          </select>
+        </div>
+        <div>
+          <label class="block text-xs font-bold uppercase tracking-wider text-forest-700 mb-1.5">Watering Frequency</label>
+          <select id="plant-freq-input" class="w-full px-4 py-3 rounded-xl bg-cream-50 border border-forest-200 focus:border-forest-600 outline-none text-sm font-medium">
+            <option value="Every 2 days">Every 2 days</option>
+            <option value="Every 5 days">Every 5 days</option>
+            <option value="Once a week">Once a week</option>
+          </select>
+        </div>
+        <div class="pt-2 flex gap-3">
+          <button type="button" onclick="toggleAddPlantModal(false)" class="flex-1 py-3 rounded-xl font-bold text-sm text-forest-700 bg-cream-100 hover:bg-cream-200 transition">Cancel</button>
+          <button type="submit" class="flex-1 py-3 rounded-xl font-bold text-sm text-white bg-forest-800 hover:bg-forest-900 shadow-md transition">Add Plant (+15 pts)</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ===================================================================== -->
+  <!-- MODAL 2: SOCIAL SHARE PREVIEW                                         -->
+  <!-- ===================================================================== -->
+  <div id="share-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-forest-950/60 backdrop-blur-sm p-4">
+    <div class="bg-white rounded-3xl max-w-md w-full p-6 border border-forest-100 shadow-2xl animate-pop-in">
+      <div class="flex items-center justify-between mb-4">
+        <h3 class="font-display text-lg font-bold text-forest-950">Share Eco-Achievement</h3>
+        <button onclick="closeShareModal()" class="p-2 rounded-xl text-forest-600 hover:bg-cream-100">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <!-- Visual Share Card Graphic -->
+      <div class="rounded-2xl bg-gradient-to-br from-forest-900 via-forest-800 to-emerald-700 p-6 text-white text-center space-y-3 shadow-lg mb-5 relative overflow-hidden">
+        <div class="w-12 h-12 rounded-2xl bg-white/15 backdrop-blur-sm flex items-center justify-center mx-auto text-2xl">🌿</div>
+        <p class="text-[11px] font-bold uppercase tracking-widest text-forest-200">EcoQuest Verified Impact</p>
+        <h4 id="share-modal-title" class="font-display text-xl font-extrabold">Level 3 Sapling Milestone</h4>
+        <p id="share-modal-desc" class="text-xs text-forest-100 leading-relaxed">I have saved 18.4 kg of CO₂ and avoided 9.2 kg of landfill waste on EcoQuest!</p>
+        <div class="pt-2 flex items-center justify-center gap-4 text-xs font-bold text-amber-300">
+          <span>✨ <span class="eco-points-display">740</span> EcoPoints</span>
+          <span>•</span>
+          <span>🔥 6-Day Streak</span>
+        </div>
+      </div>
+
+      <!-- Social Platform Buttons -->
+      <div class="grid grid-cols-3 gap-2.5">
+        <button onclick="simulateExternalShare('Instagram Story')" class="flex flex-col items-center gap-1.5 p-3 rounded-2xl bg-pink-50 hover:bg-pink-100 text-pink-700 font-bold text-xs transition">
+          <i data-lucide="instagram" class="w-5 h-5"></i>
+          <span>Instagram</span>
+        </button>
+        <button onclick="simulateExternalShare('X / Twitter')" class="flex flex-col items-center gap-1.5 p-3 rounded-2xl bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold text-xs transition">
+          <i data-lucide="twitter" class="w-5 h-5"></i>
+          <span>X / Post</span>
+        </button>
+        <button onclick="copyShareCaption()" class="flex flex-col items-center gap-1.5 p-3 rounded-2xl bg-forest-50 hover:bg-forest-100 text-forest-800 font-bold text-xs transition">
+          <i data-lucide="copy" class="w-5 h-5"></i>
+          <span>Copy Link</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================================================================== -->
+  <!-- APPLICATION JAVASCRIPT                                                -->
+  <!-- ===================================================================== -->
+  <script>
+    // --- Application State ---
+    const state = {
+      points: 740,
+      co2Saved: 18.4,
+      wasteAvoided: 9.2,
+      waterSaved: 340,
+      soundEnabled: true,
+      weeklyPoints: [85, 110, 65, 130, 95, 140, 115],
+      levels: [
+        { name: 'Lvl 1: Seedling', min: 0, max: 250, emoji: '🌱', nextName: 'Sprout 🌿' },
+        { name: 'Lvl 2: Sprout', min: 250, max: 500, emoji: '🪴', nextName: 'Sapling 🌿' },
+        { name: 'Lvl 3: Sapling', min: 500, max: 1000, emoji: '🌿', nextName: 'Tree 🌳' },
+        { name: 'Lvl 4: Tree', min: 1000, max: 2000, emoji: '🌳', nextName: 'Forest Guardian 🌲' },
+        { name: 'Lvl 5: Forest Guardian', min: 2000, max: 5000, emoji: '🌲', nextName: 'Earth Legend 🌍' }
+      ],
+      plants: [
+        {
+          id: 1,
+          name: 'Monty the Monstera',
+          species: 'Monstera Deliciosa',
+          emoji: '🌿',
+          daysPlanted: 48,
+          growthStage: 'Thriving Foliage',
+          growthPct: 78,
+          hydration: 35, // Needs water (< 50)
+          schedule: 'Every 5 days',
+          lastWatered: '4 days ago'
+        },
+        {
+          id: 2,
+          name: 'Basil Herb Patch',
+          species: 'Sweet Basil (Edible)',
+          emoji: '🌱',
+          daysPlanted: 22,
+          growthStage: 'Ready for Harvest',
+          growthPct: 90,
+          hydration: 25, // Needs water (< 50)
+          schedule: 'Every 2 days',
+          lastWatered: '2 days ago'
+        },
+        {
+          id: 3,
+          name: 'Sunny Snake Plant',
+          species: 'Sansevieria Trifasciata',
+          emoji: '🪴',
+          daysPlanted: 115,
+          growthStage: 'Mature Air Purifier',
+          growthPct: 95,
+          hydration: 88,
+          schedule: 'Once a week',
+          lastWatered: 'Yesterday'
+        }
+      ],
+      wasteCatalog: {
+        'Old Smartphone': {
+          title: 'Old Smartphone / E-Waste',
+          emoji: '📱',
+          bin: 'Certified E-Waste Drop-Off',
+          binColor: 'bg-purple-100 text-purple-800 border-purple-200',
+          confidence: '99.4%',
+          recyclable: true,
+          steps: [
+            'Back up your data and perform a full factory reset.',
+            'Never place lithium-ion batteries in curbside bins (fire hazard).',
+            'Drop off at your nearest Municipal E-Waste Kiosk or electronics retailer take-back bin.'
+          ],
+          localPoint: 'GreenTech E-Waste Hub • 1.2 km away (Open till 7 PM)',
+          impactTip: 'Recycling 1 smartphone recovers ~30mg of gold and prevents toxic lead leaching.'
+        },
+        'Greasy Pizza Box': {
+          title: 'Greasy Cardboard Pizza Box',
+          emoji: '🍕',
+          bin: 'Split: Compost Greasy Base / Recycle Clean Lid',
+          binColor: 'bg-amber-100 text-amber-800 border-amber-200',
+          confidence: '97.8%',
+          recyclable: 'Partial',
+          steps: [
+            'Tear the box in half along the hinge.',
+            'Place the clean, oil-free top lid into your Paper/Cardboard Recycling bin.',
+            'Tear the grease-soaked bottom into smaller pieces and add to your Compost bin.'
+          ],
+          localPoint: 'Curbside Wet/Compost & Dry Paper Collection',
+          impactTip: 'Food oil contaminates paper pulp batches—splitting saves entire recycling loads!'
+        },
+        'Cooking Oil': {
+          title: 'Used Vegetable / Cooking Oil',
+          emoji: '🫗',
+          bin: 'Sealed Container -> Biofuel Collection Point',
+          binColor: 'bg-rose-100 text-rose-800 border-rose-200',
+          confidence: '98.9%',
+          recyclable: true,
+          steps: [
+            'Allow the cooking oil to cool completely to room temperature.',
+            'Pour into a sturdy, sealable plastic bottle or jar.',
+            'NEVER pour down the kitchen sink—it causes severe pipe blockages.'
+          ],
+          localPoint: 'EcoCycle Bio-Diesel Drop Station • 2.4 km away',
+          impactTip: '1 liter of used cooking oil can be refined into 0.9 liters of clean biodiesel.'
+        },
+        'PET Plastic Bottle': {
+          title: 'Clear PET (#1) Plastic Bottle',
+          emoji: '🧴',
+          bin: 'Dry Plastics Recycling Bin',
+          binColor: 'bg-sky-100 text-sky-800 border-sky-200',
+          confidence: '99.7%',
+          recyclable: true,
+          steps: [
+            'Empty any remaining liquid and give it a quick rinse.',
+            'Crush the bottle flat to save collection truck space and keep the cap twisted on.',
+            'Place in your dry recycling bin.'
+          ],
+          localPoint: 'Curbside Dry Waste / Reverse Vending Machine (500m)',
+          impactTip: 'Recycling one plastic bottle saves enough energy to power a 60W bulb for 3 hours.'
+        }
+      },
+      quests: [
+        { id: 'q1', title: 'Zero-Plastic Lunch', desc: 'Use reusable containers & cutlery today', pts: 40, completed: false },
+        { id: 'q2', title: 'Hydrate Your Green Friends', desc: 'Water any thirsty plant in My Plants Tracker', pts: 30, completed: false },
+        { id: 'q3', title: 'Phantom Power Sweep', desc: 'Unplug idle chargers before bedtime', pts: 25, completed: true }
+      ],
+      feedPosts: [
+        {
+          id: 101,
+          author: 'Priya Nair',
+          initials: 'PN',
+          level: 'Lvl 4: Tree 🌳',
+          time: '18 mins ago',
+          content: 'Just harvested my first batch of homegrown sweet basil for homemade pesto! Zero plastic packaging and zero food miles. 🌱🍝',
+          badge: 'Plant Parent',
+          likes: 14,
+          liked: false
+        },
+        {
+          id: 102,
+          author: 'Rohan Mehta',
+          initials: 'RM',
+          level: 'Lvl 3: Sapling 🌿',
+          time: '2 hours ago',
+          content: 'Used the AI Waste Scanner to figure out how to dispose of old laptop batteries safely. Dropped them off at the local e-waste hub!',
+          badge: 'Smart Recycler',
+          likes: 9,
+          liked: true
+        }
+      ]
+    };
+
+    // --- Sound Feedback using Tone.js ---
+    function playChime(type = 'success') {
+      if (!state.soundEnabled || typeof Tone === 'undefined') return;
+      try {
+        if (Tone.context.state !== 'running') {
+          Tone.start();
+        }
+        const synth = new Tone.PolySynth(Tone.Synth, {
+          oscillator: { type: 'sine' },
+          envelope: { attack: 0.01, decay: 0.15, sustain: 0.05, release: 0.3 }
+        }).toDestination();
+        synth.volume.value = -12;
+
+        if (type === 'levelup') {
+          synth.triggerAttackRelease(['C5', 'E5', 'G5', 'C6'], '16n');
+        } else if (type === 'water') {
+          synth.triggerAttackRelease(['E5', 'A5'], '16n');
+        } else {
+          synth.triggerAttackRelease(['G5', 'B5'], '16n');
+        }
+      } catch (e) {
+        // Silently ignore audio errors if blocked by browser autoplay policy
+      }
+    }
+
+    function toggleSound() {
+      state.soundEnabled = !state.soundEnabled;
+      document.querySelectorAll('.sound-icon').forEach(icon => {
+        icon.setAttribute('data-lucide', state.soundEnabled ? 'volume-2' : 'volume-x');
+      });
+      lucide.createIcons();
+      showToast(state.soundEnabled ? 'Sound effects enabled 🔊' : 'Sound effects muted 🔇', 'info');
+    }
+
+    // --- Toast Notifications ---
+    function showToast(message, type = 'success') {
+      const container = document.getElementById('toast-container');
+      const toast = document.createElement('div');
+      const bgColors = {
+        success: 'bg-forest-900 text-white border-forest-700',
+        levelup: 'bg-gradient-to-r from-amber-500 to-emerald-600 text-white border-amber-300',
+        info: 'bg-white text-forest-950 border-forest-200'
+      };
+      const iconName = type === 'levelup' ? 'party-popper' : (type === 'info' ? 'info' : 'check-circle-2');
+
+      toast.className = `pointer-events-auto flex items-center gap-3 px-4 py-3.5 rounded-2xl border shadow-xl animate-pop-in ${bgColors[type] || bgColors.success}`;
+      toast.innerHTML = `
+        <i data-lucide="${iconName}" class="w-5 h-5 shrink-0 ${type === 'info' ? 'text-forest-700' : 'text-amber-300'}"></i>
+        <span class="text-xs sm:text-sm font-semibold leading-snug">${message}</span>
+      `;
+      container.appendChild(toast);
+      lucide.createIcons();
+
+      setTimeout(() => {
+        toast.style.opacity = '0';
+        toast.style.transform = 'translateY(8px)';
+        toast.style.transition = 'all 0.3s ease';
+        setTimeout(() => toast.remove(), 300);
+      }, 3400);
+    }
+
+    // --- Floating "+pts" Animation on Buttons ---
+    function spawnFloatingPoints(element, pts) {
+      if (!element) return;
+      const rect = element.getBoundingClientRect();
+      const badge = document.createElement('div');
+      badge.className = 'floating-pts fixed z-50 font-display font-extrabold text-sm text-forest-700 bg-forest-100 border border-forest-300 px-2.5 py-0.5 rounded-full shadow-md';
+      badge.style.left = `${rect.left + rect.width / 2 - 24}px`;
+      badge.style.top = `${rect.top - 10}px`;
+      badge.textContent = `+${pts} pts`;
+      document.body.appendChild(badge);
+      setTimeout(() => badge.remove(), 900);
+    }
+
+    // --- Core Points & Level Progression Logic ---
+    function awardPoints(pts, btnElement = null) {
+      const prevLevel = getCurrentLevel();
+      state.points += pts;
+      state.weeklyPoints[6] += pts; // Update Today's bar in chart
+
+      if (btnElement) spawnFloatingPoints(btnElement, pts);
+
+      const newLevel = getCurrentLevel();
+      if (newLevel.name !== prevLevel.name) {
+        playChime('levelup');
+        showToast(`🎉 LEVEL UP! You reached ${newLevel.name} ${newLevel.emoji}!`, 'levelup');
+      } else {
+        playChime('success');
+      }
+
+      updateHeaderAndMetrics();
+      renderWeeklyChart();
+    }
+
+    function getCurrentLevel() {
+      for (let i = state.levels.length - 1; i >= 0; i--) {
+        if (state.points >= state.levels[i].min) {
+          return state.levels[i];
+        }
+      }
+      return state.levels[0];
+    }
+
+    function updateHeaderAndMetrics() {
+      // Update all EcoPoints displays
+      document.querySelectorAll('.eco-points-display').forEach(el => {
+        el.textContent = state.points.toLocaleString();
+      });
+
+      // Update Impact Metrics
+      document.getElementById('metric-co2').textContent = state.co2Saved.toFixed(1);
+      document.getElementById('metric-waste').textContent = state.wasteAvoided.toFixed(1);
+      document.getElementById('metric-water').textContent = Math.round(state.waterSaved);
+
+      // Update Level Progress Bar
+      const lvl = getCurrentLevel();
+      document.getElementById('level-name-display').textContent = lvl.name;
+      document.getElementById('level-emoji-badge').textContent = lvl.emoji;
+      document.getElementById('next-level-pts-display').textContent = lvl.max;
+
+      const pct = Math.min(100, Math.max(5, ((state.points - lvl.min) / (lvl.max - lvl.min)) * 100));
+      document.getElementById('level-progress-bar').style.width = `${pct}%`;
+
+      const remaining = Math.max(0, lvl.max - state.points);
+      document.getElementById('pts-to-next-text').innerHTML = `${remaining} pts to reach <strong>${lvl.nextName}</strong>`;
+    }
+
+    // --- Tab Navigation ---
+    function switchTab(tabId) {
+      document.querySelectorAll('.tab-view').forEach(view => view.classList.add('hidden'));
+      document.getElementById(`view-${tabId}`).classList.remove('hidden');
+
+      document.querySelectorAll('.nav-tab').forEach(tab => {
+        tab.classList.remove('bg-forest-900', 'text-white', 'shadow-sm');
+        tab.classList.add('text-forest-800', 'hover:bg-forest-100/70');
+      });
+
+      const activeBtn = document.getElementById(`tab-${tabId}`);
+      activeBtn.classList.add('bg-forest-900', 'text-white', 'shadow-sm');
+      activeBtn.classList.remove('text-forest-800', 'hover:bg-forest-100/70');
+    }
+
+    // --- Dashboard: Log Sustainable Action ---
+    function logAction(btnElement, actionTitle, pts, co2, waste, water) {
+      state.co2Saved += co2;
+      state.wasteAvoided += waste;
+      state.waterSaved += water;
+
+      awardPoints(pts, btnElement);
+      showToast(`Logged "${actionTitle}" (+${pts} EcoPoints)!`, 'success');
+
+      // Prepend to Recent Logs
+      const list = document.getElementById('recent-logs-list');
+      const li = document.createElement('li');
+      li.className = 'flex items-center justify-between p-3 rounded-2xl bg-forest-50 border border-forest-200 text-sm animate-pop-in';
+      li.innerHTML = `
+        <div class="flex items-center gap-3">
+          <span class="w-8 h-8 rounded-xl bg-forest-200 text-forest-800 flex items-center justify-center shrink-0">
+            <i data-lucide="check" class="w-4 h-4"></i>
+          </span>
+          <div>
+            <p class="font-semibold text-forest-950">${actionTitle}</p>
+            <p class="text-[11px] text-forest-700">Just now</p>
+          </div>
+        </div>
+        <span class="font-bold text-xs text-forest-800 bg-forest-200/80 px-2 py-1 rounded-lg">+${pts} pts</span>
+      `;
+      list.prepend(li);
+      lucide.createIcons();
+    }
+
+    // --- Dashboard: Render Weekly Impact Bar Chart ---
+    function renderWeeklyChart() {
+      const container = document.getElementById('weekly-chart');
+      const maxVal = Math.max(...state.weeklyPoints, 160);
+      container.innerHTML = state.weeklyPoints.map((val, idx) => {
+        const heightPct = Math.max(12, Math.round((val / maxVal) * 100));
+        const isToday = idx === 6;
+        return `
+          <div class="flex-1 flex flex-col items-center justify-end h-full group">
+            <span class="text-[11px] font-bold ${isToday ? 'text-forest-950' : 'text-forest-600'} mb-1.5 transition-transform group-hover:-translate-y-0.5">${val}</span>
+            <div class="w-full max-w-[42px] rounded-t-xl transition-all duration-500 ${isToday ? 'bg-gradient-to-t from-forest-700 to-emerald-400 shadow-glow' : 'bg-forest-600/85 group-hover:bg-forest-700'}" style="height: ${heightPct}%;"></div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    // --- Plants Tracker Logic ---
+    function renderPlants() {
+      const grid = document.getElementById('plants-grid');
+      const thirstyCount = state.plants.filter(p => p.hydration < 50).length;
+      const badge = document.getElementById('plants-due-badge');
+      badge.textContent = thirstyCount;
+      badge.classList.toggle('hidden', thirstyCount === 0);
+
+      grid.innerHTML = state.plants.map(plant => {
+        const needsWater = plant.hydration < 50;
+        const barColor = needsWater ? 'bg-amber-500' : 'bg-sky-500';
+        const statusBadge = needsWater
+          ? `<span class="inline-flex items-center gap-1 text-[11px] font-bold bg-amber-100 text-amber-800 px-2.5 py-1 rounded-full"><i data-lucide="alert-circle" class="w-3 h-3"></i> Thirsty</span>`
+          : `<span class="inline-flex items-center gap-1 text-[11px] font-bold bg-sky-100 text-sky-800 px-2.5 py-1 rounded-full"><i data-lucide="check-circle" class="w-3 h-3"></i> Hydrated</span>`;
+
+        return `
+          <div class="bg-white rounded-3xl p-6 border ${needsWater ? 'border-amber-300' : 'border-forest-100'} shadow-soft flex flex-col justify-between transition hover:shadow-md">
+            <div>
+              <div class="flex items-start justify-between gap-2 mb-4">
+                <div class="flex items-center gap-3">
+                  <div class="w-14 h-14 rounded-2xl bg-forest-50 border border-forest-100 flex items-center justify-center text-3xl shadow-inner">
+                    ${plant.emoji}
+                  </div>
+                  <div>
+                    <h3 class="font-display font-bold text-lg text-forest-950 leading-tight">${plant.name}</h3>
+                    <p class="text-xs font-medium text-forest-600">${plant.species}</p>
+                  </div>
+                </div>
+                ${statusBadge}
+              </div>
+
+              <!-- Stats Pills -->
+              <div class="grid grid-cols-2 gap-2.5 mb-4 text-xs">
+                <div class="p-2.5 rounded-xl bg-cream-50 border border-forest-100">
+                  <span class="text-forest-600 block">Age</span>
+                  <span class="font-bold text-forest-950">Day ${plant.daysPlanted}</span>
+                </div>
+                <div class="p-2.5 rounded-xl bg-cream-50 border border-forest-100">
+                  <span class="text-forest-600 block">Stage</span>
+                  <span class="font-bold text-forest-950 truncate block">${plant.growthStage}</span>
+                </div>
+              </div>
+
+              <!-- Hydration Meter -->
+              <div class="space-y-1.5 mb-5">
+                <div class="flex justify-between text-xs font-semibold">
+                  <span class="text-forest-700 flex items-center gap-1"><i data-lucide="droplets" class="w-3.5 h-3.5 text-sky-500"></i> Moisture Level</span>
+                  <span class="text-forest-950 font-bold">${plant.hydration}%</span>
+                </div>
+                <div class="w-full h-2.5 bg-cream-200 rounded-full overflow-hidden">
+                  <div class="h-full ${barColor} rounded-full transition-all duration-500" style="width: ${plant.hydration}%;"></div>
+                </div>
+                <p class="text-[11px] text-forest-600 flex justify-between">
+                  <span>Schedule: ${plant.schedule}</span>
+                  <span>Last: ${plant.lastWatered}</span>
+                </p>
+              </div>
+            </div>
+
+            <!-- Water Action Button -->
+            <button onclick="waterPlant(this, ${plant.id})" class="w-full py-3 px-4 rounded-2xl font-bold text-sm flex items-center justify-center gap-2 transition active:scale-95 ${needsWater ? 'bg-sky-600 hover:bg-sky-700 text-white shadow-md shadow-sky-600/20' : 'bg-forest-50 hover:bg-forest-100 text-forest-900 border border-forest-200'}">
+              <i data-lucide="droplet" class="w-4 h-4"></i>
+              <span>${needsWater ? 'Water Plant Now (+10 pts)' : 'Mist & Refresh (+10 pts)'}</span>
+            </button>
+          </div>
+        `;
+      }).join('');
+      lucide.createIcons();
+    }
+
+    function waterPlant(btnElement, plantId) {
+      const plant = state.plants.find(p => p.id === plantId);
+      if (!plant) return;
+
+      plant.hydration = 100;
+      plant.lastWatered = 'Just now';
+      plant.growthPct = Math.min(100, plant.growthPct + 3);
+
+      playChime('water');
+      awardPoints(10, btnElement);
+      showToast(`💧 Watered ${plant.name}! Moisture restored to 100% (+10 pts).`, 'success');
+
+      // Also check off Quest q2 if incomplete
+      const waterQuest = state.quests.find(q => q.id === 'q2');
+      if (waterQuest && !waterQuest.completed) {
+        toggleQuest('q2', true);
+      }
+
+      renderPlants();
+    }
+
+    function toggleAddPlantModal(show) {
+      const modal = document.getElementById('add-plant-modal');
+      if (show) {
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+      } else {
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+      }
+    }
+
+    function handleAddPlant(e) {
+      e.preventDefault();
+      const name = document.getElementById('plant-name-input').value.trim();
+      const [species, emoji] = document.getElementById('plant-species-input').value.split('|');
+      const schedule = document.getElementById('plant-freq-input').value;
+
+      if (!name) return;
+
+      state.plants.unshift({
+        id: Date.now(),
+        name,
+        species,
+        emoji,
+        daysPlanted: 1,
+        growthStage: 'Newly Potted',
+        growthPct: 15,
+        hydration: 90,
+        schedule,
+        lastWatered: 'Just now'
+      });
+
+      document.getElementById('plant-name-input').value = '';
+      toggleAddPlantModal(false);
+      awardPoints(15);
+      showToast(`🌱 Added "${name}" to your plant sanctuary (+15 pts)!`, 'success');
+      renderPlants();
+    }
+
+    // --- AI Waste Scanner & Disposal Guide Logic ---
+    function selectWasteItem(itemKey) {
+      document.getElementById('waste-search-input').value = itemKey;
+      renderWasteResult(itemKey);
+    }
+
+    function handleWasteSearch(query) {
+      const trimmed = query.trim().toLowerCase();
+      if (!trimmed) {
+        renderWasteResult('PET Plastic Bottle');
+        return;
+      }
+      const match = Object.keys(state.wasteCatalog).find(k => k.toLowerCase().includes(trimmed));
+      if (match) {
+        renderWasteResult(match);
+      } else {
+        // Dynamic fallback AI classification for custom user searches
+        const card = document.getElementById('waste-result-card');
+        card.innerHTML = `
+          <div class="space-y-4 animate-pop-in">
+            <div class="flex items-start justify-between gap-3">
+              <div class="flex items-center gap-3">
+                <div class="w-12 h-12 rounded-2xl bg-forest-100 text-2xl flex items-center justify-center">🔍</div>
+                <div>
+                  <span class="text-[11px] font-bold uppercase tracking-wider text-emerald-700">AI Smart Inference • 92.5% Match</span>
+                  <h4 class="font-display text-xl font-bold text-forest-950 capitalize">${query}</h4>
+                </div>
+              </div>
+              <span class="px-3 py-1 rounded-full text-xs font-bold bg-forest-100 text-forest-800 border border-forest-200">Check Material Code</span>
+            </div>
+            <p class="text-sm text-forest-800 leading-relaxed">
+              Separate mixed materials (e.g., plastic windows from cardboard boxes). Rinse any food residue before placing clean plastics, metals, or paper into your <strong>Dry Recycling</strong> bin.
+            </p>
+            <div class="p-3.5 rounded-2xl bg-cream-100 border border-forest-200/70 text-xs text-forest-800 flex items-center gap-2">
+              <i data-lucide="map-pin" class="w-4 h-4 text-forest-700 shrink-0"></i>
+              <span><strong>Nearest Drop-Off:</strong> Ward 12 Material Recovery Facility • 1.8 km away</span>
+            </div>
+          </div>
+        `;
+        lucide.createIcons();
+      }
+    }
+
+    function renderWasteResult(itemKey) {
+      const item = state.wasteCatalog[itemKey] || state.wasteCatalog['PET Plastic Bottle'];
+      const card = document.getElementById('waste-result-card');
+      card.innerHTML = `
+        <div class="space-y-4 animate-pop-in">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-forest-100">
+            <div class="flex items-center gap-3.5">
+              <div class="w-14 h-14 rounded-2xl bg-cream-100 border border-forest-200 flex items-center justify-center text-3xl shrink-0">
+                ${item.emoji}
+              </div>
+              <div>
+                <div class="flex items-center gap-2">
+                  <span class="text-[11px] font-bold uppercase tracking-wider text-emerald-700">AI Confidence: ${item.confidence}</span>
+                </div>
+                <h4 class="font-display text-xl font-bold text-forest-950">${item.title}</h4>
+              </div>
+            </div>
+            <span class="px-3.5 py-1.5 rounded-xl text-xs font-extrabold border ${item.binColor} self-start sm:self-center">
+              ${item.bin}
+            </span>
+          </div>
+
+          <div>
+            <p class="text-xs font-bold uppercase tracking-wider text-forest-600 mb-2">Step-by-Step Disposal Guide:</p>
+            <ul class="space-y-2">
+              ${item.steps.map((step, i) => `
+                <li class="flex items-start gap-2.5 text-sm text-forest-900">
+                  <span class="w-5 h-5 rounded-full bg-forest-100 text-forest-800 font-bold text-xs flex items-center justify-center shrink-0 mt-0.5">${i + 1}</span>
+                  <span>${step}</span>
+                </li>
+              `).join('')}
+            </ul>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
+            <div class="p-3.5 rounded-2xl bg-cream-50 border border-forest-100 text-xs">
+              <span class="font-bold text-forest-950 flex items-center gap-1.5 mb-1"><i data-lucide="map-pin" class="w-3.5 h-3.5 text-forest-700"></i> Nearest Drop-Off</span>
+              <p class="text-forest-700">${item.localPoint}</p>
+            </div>
+            <div class="p-3.5 rounded-2xl bg-forest-50 border border-forest-100 text-xs">
+              <span class="font-bold text-forest-950 flex items-center gap-1.5 mb-1"><i data-lucide="sparkles" class="w-3.5 h-3.5 text-amber-500"></i> Why It Matters</span>
+              <p class="text-forest-700">${item.impactTip}</p>
+            </div>
+          </div>
+        </div>
+      `;
+      lucide.createIcons();
+    }
+
+    function triggerSimulatedPhotoScan() {
+      const idle = document.getElementById('scanner-idle-state');
+      const active = document.getElementById('scanner-active-state');
+      const laser = document.getElementById('scanner-laser');
+      const emojiEl = document.getElementById('scanning-emoji');
+
+      const keys = Object.keys(state.wasteCatalog);
+      const randomKey = keys[Math.floor(Math.random() * keys.length)];
+      emojiEl.textContent = state.wasteCatalog[randomKey].emoji;
+
+      idle.classList.add('hidden');
+      active.classList.remove('hidden');
+      laser.classList.remove('hidden');
+
+      setTimeout(() => {
+        active.classList.add('hidden');
+        laser.classList.add('hidden');
+        idle.classList.remove('hidden');
+
+        selectWasteItem(randomKey);
+        awardPoints(15);
+        showToast(`🤖 AI Identified: ${state.wasteCatalog[randomKey].title} (+15 pts)!`, 'success');
+      }, 1500);
+    }
+
+    // --- Quests, Leaderboard & Community Feed ---
+    function renderQuests() {
+      const container = document.getElementById('quests-list');
+      container.innerHTML = state.quests.map(q => `
+        <div onclick="toggleQuest('${q.id}')" class="cursor-pointer flex items-center justify-between p-3.5 rounded-2xl border transition-all ${q.completed ? 'bg-forest-50/80 border-forest-200 opacity-80' : 'bg-cream-50 hover:bg-forest-50/50 border-forest-100'}">
+          <div class="flex items-center gap-3">
+            <div class="w-6 h-6 rounded-lg flex items-center justify-center border-2 transition ${q.completed ? 'bg-forest-700 border-forest-700 text-white' : 'border-forest-300 bg-white'}">
+              ${q.completed ? '<i data-lucide="check" class="w-4 h-4"></i>' : ''}
+            </div>
+            <div>
+              <p class="text-sm font-bold ${q.completed ? 'line-through text-forest-600' : 'text-forest-950'}">${q.title}</p>
+              <p class="text-xs text-forest-600">${q.desc}</p>
+            </div>
+          </div>
+          <span class="text-xs font-extrabold px-2.5 py-1 rounded-full shrink-0 ${q.completed ? 'bg-forest-200 text-forest-800' : 'bg-amber-100 text-amber-800'}">+${q.pts} pts</span>
+        </div>
+      `).join('');
+      lucide.createIcons();
+    }
+
+    function toggleQuest(questId, forceComplete = false) {
+      const quest = state.quests.find(q => q.id === questId);
+      if (!quest) return;
+      if (quest.completed && !forceComplete) return; // Prevent double-claiming points
+
+      if (!quest.completed) {
+        quest.completed = true;
+        awardPoints(quest.pts);
+        showToast(`🏆 Quest Completed: "${quest.title}" (+${quest.pts} pts)!`, 'success');
+        renderQuests();
+      }
+    }
+
+    function renderLeaderboard() {
+      const leaders = [
+        { name: 'Ananya Verma', pts: 920, level: 'Sapling 🌿', isUser: false },
+        { name: 'Aarav Sharma (You)', pts: state.points, level: getCurrentLevel().name.split(': ')[1] + ' ' + getCurrentLevel().emoji, isUser: true },
+        { name: 'Kabir Das', pts: 685, level: 'Sapling 🌿', isUser: false },
+        { name: 'Meera Krishnan', pts: 540, level: 'Sapling 🌿', isUser: false }
+      ].sort((a, b) => b.pts - a.pts);
+
+      const container = document.getElementById('leaderboard-list');
+      container.innerHTML = leaders.map((user, idx) => {
+        const rankEmoji = idx === 0 ? '🥇' : idx === 1 ? '🥈' : idx === 2 ? '🥉' : `#${idx + 1}`;
+        return `
+          <div class="flex items-center justify-between p-3 rounded-2xl ${user.isUser ? 'bg-forest-900 text-white shadow-sm' : 'bg-cream-50 text-forest-950 border border-forest-100'}">
+            <div class="flex items-center gap-3">
+              <span class="w-6 text-center font-extrabold text-sm">${rankEmoji}</span>
+              <div>
+                <p class="text-xs sm:text-sm font-bold">${user.name}</p>
+                <p class="text-[11px] ${user.isUser ? 'text-forest-200' : 'text-forest-600'}">${user.level}</p>
+              </div>
+            </div>
+            <span class="text-xs font-extrabold px-2.5 py-1 rounded-lg ${user.isUser ? 'bg-white/15 text-amber-300' : 'bg-forest-100 text-forest-800'}">
+              ${user.pts.toLocaleString()} pts
+            </span>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function renderFeed() {
+      const container = document.getElementById('eco-feed-list');
+      container.innerHTML = state.feedPosts.map(post => `
+        <article class="bg-white rounded-3xl p-5 border border-forest-100 shadow-soft space-y-3.5 animate-pop-in">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-3">
+              <div class="w-10 h-10 rounded-full bg-forest-100 text-forest-900 font-bold text-sm flex items-center justify-center">
+                ${post.initials}
+              </div>
+              <div>
+                <div class="flex items-center gap-2">
+                  <h4 class="font-bold text-sm text-forest-950">${post.author}</h4>
+                  <span class="text-[11px] font-semibold bg-forest-50 text-forest-700 px-2 py-0.5 rounded-md border border-forest-100">${post.level}</span>
+                </div>
+                <p class="text-xs text-forest-500">${post.time}</p>
+              </div>
+            </div>
+            <span class="text-[11px] font-bold bg-amber-50 text-amber-800 border border-amber-200/70 px-2.5 py-1 rounded-full">
+              🏅 ${post.badge}
+            </span>
+          </div>
+
+          <p class="text-sm text-forest-900 leading-relaxed">${post.content}</p>
+
+          <div class="pt-2 border-t border-forest-100 flex items-center justify-between">
+            <button onclick="toggleLikePost(${post.id})" class="inline-flex items-center gap-1.5 text-xs font-bold px-3 py-1.5 rounded-xl transition ${post.liked ? 'bg-rose-50 text-rose-600' : 'text-forest-700 hover:bg-cream-100'}">
+              <i data-lucide="heart" class="w-4 h-4 ${post.liked ? 'fill-rose-500 text-rose-500' : ''}"></i>
+              <span>${post.likes} Cheers</span>
+            </button>
+
+            <button onclick="openShareModal('${post.author} on EcoQuest', '${post.content.replace(/'/g, "\\'")}')" class="inline-flex items-center gap-1.5 text-xs font-bold text-forest-700 hover:bg-forest-50 px-3 py-1.5 rounded-xl transition">
+              <i data-lucide="share-2" class="w-3.5 h-3.5"></i>
+              <span>Share Achievement</span>
+            </button>
+          </div>
+        </article>
+      `).join('');
+      lucide.createIcons();
+    }
+
+    function toggleLikePost(postId) {
+      const post = state.feedPosts.find(p => p.id === postId);
+      if (!post) return;
+      post.liked = !post.liked;
+      post.likes += post.liked ? 1 : -1;
+      renderFeed();
+    }
+
+    function createCommunityPost() {
+      const input = document.getElementById('new-post-input');
+      const text = input.value.trim();
+      if (!text) {
+        showToast('Write a quick update before posting!', 'info');
+        return;
+      }
+
+      const lvl = getCurrentLevel();
+      state.feedPosts.unshift({
+        id: Date.now(),
+        author: 'Aarav Sharma',
+        initials: 'AR',
+        level: `${lvl.name} ${lvl.emoji}`,
+        time: 'Just now',
+        content: text,
+        badge: 'Community Voice',
+        likes: 1,
+        liked: true
+      });
+
+      input.value = '';
+      awardPoints(10);
+      showToast('🌿 Posted to Community Eco-Feed (+10 pts)!', 'success');
+      renderFeed();
+      renderLeaderboard();
+    }
+
+    // --- Social Share Modal ---
+    function openShareModal(title, desc) {
+      document.getElementById('share-modal-title').textContent = title;
+      document.getElementById('share-modal-desc').textContent = desc;
+      const modal = document.getElementById('share-modal');
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+    }
+
+    function closeShareModal() {
+      const modal = document.getElementById('share-modal');
+      modal.classList.add('hidden');
+      modal.classList.remove('flex');
+    }
+
+    function simulateExternalShare(platform) {
+      closeShareModal();
+      awardPoints(5);
+      showToast(`✨ Shared achievement card to ${platform} (+5 bonus pts)!`, 'success');
+    }
+
+    function copyShareCaption() {
+      const title = document.getElementById('share-modal-title').textContent;
+      const desc = document.getElementById('share-modal-desc').textContent;
+      const textArea = document.createElement('textarea');
+      textArea.value = `🌿 ${title} — ${desc} #EcoQuest #SustainableLiving`;
+      document.body.appendChild(textArea);
+      textArea.select();
+      document.execCommand('copy');
+      document.body.removeChild(textArea);
+      closeShareModal();
+      showToast('📋 Achievement link & caption copied to clipboard!', 'info');
+    }
+
+    // --- Initialize Application ---
+    window.addEventListener('DOMContentLoaded', () => {
+      updateHeaderAndMetrics();
+      renderWeeklyChart();
+      renderPlants();
+      renderWasteResult('PET Plastic Bottle');
+      renderQuests();
+      renderLeaderboard();
+      renderFeed();
+      lucide.createIcons();
+    });
+  </script>
+</body>
+</html>

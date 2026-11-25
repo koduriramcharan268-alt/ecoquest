@@ -53,13 +53,3 @@ Then visit `https://sites.google.com/view/ecoquest-web-prototype/full-page-embed
 * [ ] AI leaf-health diagnostics for indoor and garden plants
 * [ ] Local eco-friendly marketplace and community swap boards
 
----
-
-## 👥 Team
-
-* **[Your Name]** – Role / Contribution
-* **[Teammate Name]** – Role / Contribution
-
-```
-
-```

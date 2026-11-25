@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>EcoQuest — Your Daily Quest for a Greener Planet</title>
+  <style>
+    :root {
+      --bg: #f1f8f4;
+      --surface: #ffffff;
+      --primary: #1b7a43;
+      --primary-dark: #135930;
+      --accent: #34c77b;
+      --amber: #f59e0b;
+      --text: #163020;
+      --muted: #5a7263;
+      --border: #d5e8dc;
+      --shadow: 0 8px 24px rgba(22, 48, 32, 0.08);
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; }
+    body { background: var(--bg); color: var(--text); padding-bottom: 48px; }
+    header {
+      background: linear-gradient(135deg, var(--primary-dark), var(--primary));
+      color: #fff;
+      padding: 20px 24px;
+      box-shadow: var(--shadow);
+    }
+    .header-inner {
+      max-width: 1100px;
+      margin: 0 auto;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+    }
+    .brand h1 { font-size: 1.6rem; display: flex; align-items: center; gap: 8px; }
+    .brand p { font-size: 0.9rem; opacity: 0.9; margin-top: 2px; }
+    .stats-bar {
+      background: rgba(255, 255, 255, 0.14);
+      padding: 12px 18px;
+      border-radius: 14px;
+      min-width: 280px;
+    }
+    .stats-top { display: flex; justify-content: space-between; font-weight: 600; font-size: 0.92rem; margin-bottom: 6px; }
+    .progress-track { background: rgba(0, 0, 0, 0.25); height: 10px; border-radius: 99px; overflow: hidden; }
+    .progress-fill { background: #7ef29d; height: 100%; width: 65%; transition: width 0.4s ease; }
+
+    nav {
+      max-width: 1100px;
+      margin: 18px auto 0;
+      padding: 0 16px;
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    .tab-btn {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 10px 16px;
+      border-radius: 10px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .tab-btn.active { background: var(--primary); color: #fff; border-color: var(--primary); }
+
+    main { max-width: 1100px; margin: 20px auto; padding: 0 16px; }
+    .tab-panel { display: none; }
+    .tab-panel.active { display: block; }
+
+    .grid-3 { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px; margin-bottom: 20px; }
+    .grid-2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 16px; }
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 20px;
+      box-shadow: var(--shadow);
+    }
+    .card h2 { font-size: 1.15rem; margin-bottom: 12px; color: var(--primary-dark); }
+    .metric-val { font-size: 2rem; font-weight: 800; color: var(--primary); }
+    .metric-sub { font-size: 0.85rem; color: var(--muted); margin-top: 4px; }
+
+    .action-list { display: flex; flex-direction: column; gap: 10px; }
+    .action-btn {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: #f6fbf8;
+      border: 1px solid var(--border);
+      padding: 12px 16px;
+      border-radius: 12px;
+      cursor: pointer;
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: var(--text);
+      transition: transform 0.12s, background 0.2s;
+    }
+    .action-btn:hover { background: #e6f5ec; transform: translateY(-1px); }
+    .pts-badge { background: var(--primary); color: #fff; padding: 4px 10px; border-radius: 99px; font-size: 0.8rem; }
+
+    .chart-bars { display: flex; align-items: flex-end; gap: 12px; height: 150px; padding-top: 20px; }
+    .bar-col { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 6px; height: 100%; justify-content: flex-end; }
+    .bar { width: 100%; max-width: 36px; background: var(--accent); border-radius: 8px 8px 0 0; transition: height 0.4s; }
+    .bar-label { font-size: 0.78rem; color: var(--muted); font-weight: 600; }
+
+    .plant-card { display: flex; flex-direction: column; gap: 10px; }
+    .plant-header { display: flex; justify-content: space-between; align-items: center; }
+    .water-bar { height: 8px; background: #e2f1f8; border-radius: 99px; overflow: hidden; }
+    .water-fill { height: 100%; background: #0ea5e9; transition: width 0.3s; }
+    .btn-primary {
+      background: var(--primary);
+      color: #fff;
+      border: none;
+      padding: 9px 14px;
+      border-radius: 10px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    .btn-primary:hover { background: var(--primary-dark); }
+
+    .scanner-box {
+      border: 2px dashed var(--primary);
+      border-radius: 14px;
+      padding: 24px;
+      text-align: center;
+      background: #f6fbf8;
+      margin-bottom: 16px;
+    }
+    .scan-samples { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin-top: 12px; }
+    .chip {
+      background: #fff;
+      border: 1px solid var(--border);
+      padding: 8px 12px;
+      border-radius: 99px;
+      cursor: pointer;
+      font-size: 0.88rem;
+      font-weight: 600;
+    }
+    .chip:hover { border-color: var(--primary); background: #eaf7ef; }
+    .scan-result {
+      margin-top: 16px;
+      padding: 16px;
+      border-radius: 12px;
+      background: #eaf7ef;
+      border-left: 4px solid var(--primary);
+      display: none;
+    }
+
+    .feed-item { padding: 14px 0; border-bottom: 1px solid var(--border); }
+    .feed-item:last-child { border-bottom: none; }
+    .feed-meta { font-size: 0.82rem; color: var(--muted); margin-bottom: 4px; }
+    .toast {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background: var(--primary-dark);
+      color: #fff;
+      padding: 12px 20px;
+      border-radius: 12px;
+      box-shadow: var(--shadow);
+      opacity: 0;
+      transform: translateY(12px);
+      transition: all 0.25s;
+      pointer-events: none;
+      font-weight: 600;
+      z-index: 100;
+    }
+    .toast.show { opacity: 1; transform: translateY(0); }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="header-inner">
+    <div class="brand">
+      <h1>🌱 EcoQuest</h1>
+      <p>Your Daily Quest for a Greener Planet</p>
+    </div>
+    <div class="stats-bar">
+      <div class="stats-top">
+        <span id="levelLabel">Lvl 3: Sapling 🌿</span>
+        <span id="pointsLabel">325 / 500 EcoPoints</span>
+      </div>
+      <div class="progress-track">
+        <div class="progress-fill" id="progressFill"></div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<nav>
+  <button class="tab-btn active" onclick="switchTab('dashboard', this)">📊 Impact Dashboard</button>
+  <button class="tab-btn" onclick="switchTab('plants', this)">🪴 My Plants</button>
+  <button class="tab-btn" onclick="switchTab('scanner', this)">♻️ AI Waste Scanner</button>
+  <button class="tab-btn" onclick="switchTab('community', this)">🌍 Quests & Eco-Feed</button>
+</nav>
+
+<main>
+  <!-- DASHBOARD TAB -->
+  <section id="dashboard" class="tab-panel active">
+    <div class="grid-3">
+      <div class="card">
+        <h2>Waste Diverted</h2>
+        <div class="metric-val" id="wasteMetric">14.2 kg</div>
+        <div class="metric-sub">+18% vs last week</div>
+      </div>
+      <div class="card">
+        <h2>CO₂ Saved</h2>
+        <div class="metric-val" id="co2Metric">28.5 kg</div>
+        <div class="metric-sub">Equivalent to 1.3 trees planted</div>
+      </div>
+      <div class="card">
+        <h2>Current Streak</h2>
+        <div class="metric-val">🔥 9 Days</div>
+        <div class="metric-sub">Keep logging daily for 2x bonus</div>
+      </div>
+    </div>
+
+    <div class="grid-2">
+      <div class="card">
+        <h2>⚡ Quick-Log Sustainable Action</h2>
+        <div class="action-list">
+          <button class="action-btn" onclick="logAction('Used reusable coffee cup', 15, 0.2, 0.4)">
+            <span>☕ Used reusable coffee cup</span>
+            <span class="pts-badge">+15 pts</span>
+          </button>
+          <button class="action-btn" onclick="logAction('Composted kitchen food scraps', 25, 0.8, 1.1)">
+            <span>🥕 Composted food scraps</span>
+            <span class="pts-badge">+25 pts</span>
+          </button>
+          <button class="action-btn" onclick="logAction('Recycled clean plastic & paper', 20, 0.5, 0.7)">
+            <span>♻️ Recycled plastic & paper</span>
+            <span class="pts-badge">+20 pts</span>
+          </button>
+          <button class="action-btn" onclick="logAction('Walked or biked instead of driving', 30, 0.0, 2.4)">
+            <span>🚲 Walked or biked short trip</span>
+            <span class="pts-badge">+30 pts</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>📈 Weekly EcoPoints Activity</h2>
+        <div class="chart-bars" id="weeklyChart">
+          <div class="bar-col"><div class="bar" style="height:45%"></div><span class="bar-label">Mon</span></div>
+          <div class="bar-col"><div class="bar" style="height:60%"></div><span class="bar-label">Tue</span></div>
+          <div class="bar-col"><div class="bar" style="height:40%"></div><span class="bar-label">Wed</span></div>
+          <div class="bar-col"><div class="bar" style="height:80%"></div><span class="bar-label">Thu</span></div>
+          <div class="bar-col"><div class="bar" style="height:65%"></div><span class="bar-label">Fri</span></div>
+          <div class="bar-col"><div class="bar" style="height:90%"></div><span class="bar-label">Sat</span></div>
+          <div class="bar-col"><div class="bar" id="todayBar" style="height:55%; background: var(--primary);"></div><span class="bar-label">Today</span></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- PLANTS TAB -->
+  <section id="plants" class="tab-panel">
+    <div class="grid-3">
+      <div class="card plant-card">
+        <div class="plant-header">
+          <h2>🌿 Monty (Monstera)</h2>
+          <span>Hydration: <strong id="h1">55%</strong></span>
+        </div>
+        <div class="water-bar"><div class="water-fill" id="w1" style="width:55%"></div></div>
+        <p class="metric-sub">Planted: 4 months ago • Indirect sunlight</p>
+        <button class="btn-primary" onclick="waterPlant('w1', 'h1', 'Monty')">💧 Water Plant (+10 pts)</button>
+      </div>
+
+      <div class="card plant-card">
+        <div class="plant-header">
+          <h2>🌱 Basil Herb Patch</h2>
+          <span>Hydration: <strong id="h2">40%</strong></span>
+        </div>
+        <div class="water-bar"><div class="water-fill" id="w2" style="width:40%"></div></div>
+        <p class="metric-sub">Harvested 3 times • Zero-waste kitchen herbs</p>
+        <button class="btn-primary" onclick="waterPlant('w2', 'h2', 'Basil Patch')">💧 Water Plant (+10 pts)</button>
+      </div>
+
+      <div class="card plant-card">
+        <div class="plant-header">
+          <h2>🪴 Sunny (Snake Plant)</h2>
+          <span>Hydration: <strong id="h3">80%</strong></span>
+        </div>
+        <div class="water-bar"><div class="water-fill" id="w3" style="width:80%"></div></div>
+        <p class="metric-sub">Air-purifying • Water every 10 days</p>
+        <button class="btn-primary" onclick="waterPlant('w3', 'h3', 'Sunny')">💧 Water Plant (+10 pts)</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- SCANNER TAB -->
+  <section id="scanner" class="tab-panel">
+    <div class="card">
+      <h2>📷 AI "What Goes Where?" Waste Scanner</h2>
+      <p class="metric-sub">Select a sample item below to test Vertex AI Vision classification and local disposal rules:</p>
+      <div class="scanner-box">
+        <p><strong>Select an item to scan:</strong></p>
+        <div class="scan-samples">
+          <button class="chip" onclick="scanItem('pizza')">🍕 Greasy Pizza Box</button>
+          <button class="chip" onclick="scanItem('phone')">📱 Old Smartphone</button>
+          <button class="chip" onclick="scanItem('bottle')">🧴 PET #1 Plastic Bottle</button>
+          <button class="chip" onclick="scanItem('oil')">🫗 Used Cooking Oil</button>
+        </div>
+        <div class="scan-result" id="scanResult"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- COMMUNITY TAB -->
+  <section id="community" class="tab-panel">
+    <div class="grid-2">
+      <div class="card">
+        <h2>🏆 Daily Quests & Badges</h2>
+        <div class="feed-item">
+          <strong>✅ Plastic-Free Lunch</strong>
+          <p class="metric-sub">Completed • +40 EcoPoints earned</p>
+        </div>
+        <div class="feed-item">
+          <strong>⏳ Zero-Food-Waste Week (5/7 days)</strong>
+          <p class="metric-sub">Reward: "Compost Champion" Badge + 100 pts</p>
+        </div>
+        <div class="feed-item">
+          <strong>🔒 Neighborhood Clean-Up</strong>
+          <p class="metric-sub">Join 12 local members this Saturday</p>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>💬 Community Eco-Feed</h2>
+        <div id="feedContainer">
+          <div class="feed-item">
+            <div class="feed-meta"><strong>Aarav M.</strong> • 18 mins ago</div>
+            <p>Unlocked the <strong>Tree Guardian 🌳</strong> level after 30 days of composting!</p>
+          </div>
+          <div class="feed-item">
+            <div class="feed-meta"><strong>Priya K.</strong> • 1 hour ago</div>
+            <p>Harvested fresh balcony basil for dinner instead of buying plastic-wrapped herbs 🌱</p>
+          </div>
+        </div>
+        <button class="btn-primary" style="margin-top:12px;" onclick="shareMilestone()">📣 Share My Progress to Feed (+15 pts)</button>
+      </div>
+    </div>
+  </section>
+</main>
+
+<div class="toast" id="toast"></div>
+
+<script>
+  let points = 325;
+  let waste = 14.2;
+  let co2 = 28.5;
+  let todayHeight = 55;
+
+  function showToast(msg) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 2600);
+  }
+
+  function updateHeader() {
+    let level = 'Lvl 3: Sapling 🌿';
+    let target = 500;
+    if (points >= 500) {
+      level = 'Lvl 4: Tree Guardian 🌳';
+      target = 1000;
+    }
+    const pct = Math.min(100, Math.round((points / target) * 100));
+    document.getElementById('levelLabel').textContent = level;
+    document.getElementById('pointsLabel').textContent = `${points} / ${target} EcoPoints`;
+    document.getElementById('progressFill').style.width = pct + '%';
+  }
+
+  function logAction(name, pts, wAdd, cAdd) {
+    points += pts;
+    waste = +(waste + wAdd).toFixed(1);
+    co2 = +(co2 + cAdd).toFixed(1);
+    todayHeight = Math.min(100, todayHeight + 10);
+
+    document.getElementById('wasteMetric').textContent = waste + ' kg';
+    document.getElementById('co2Metric').textContent = co2 + ' kg';
+    document.getElementById('todayBar').style.height = todayHeight + '%';
+    updateHeader();
+    showToast(`+${pts} EcoPoints! Logged: ${name}`);
+  }
+
+  function waterPlant(barId, textId, plantName) {
+    document.getElementById(barId).style.width = '100%';
+    document.getElementById(textId).textContent = '100%';
+    points += 10;
+    updateHeader();
+    showToast(`💧 Watered ${plantName}! +10 EcoPoints`);
+  }
+
+  function scanItem(type) {
+    const res = document.getElementById('scanResult');
+    const data = {
+      pizza: '<strong>Compost / Organic Waste (98% confidence):</strong> Grease contaminates paper recycling. Tear off the clean lid for paper recycling and compost the greasy bottom.',
+      phone: '<strong>E-Waste Drop-Off Required (99% confidence):</strong> Never place lithium batteries in household bins. Nearest certified e-waste center: 1.2 km away.',
+      bottle: '<strong>Blue Recycling Bin (97% confidence):</strong> Empty, rinse briefly, and keep the cap attached before placing in dry plastic recycling.',
+      oil: '<strong>Hazardous / Bio-Fuel Collection (95% confidence):</strong> Do not pour down the sink. Store in a sealed jar for local biodiesel drop-off.'
+    };
+    res.innerHTML = data[type];
+    res.style.display = 'block';
+  }
+
+  function shareMilestone() {
+    points += 15;
+    updateHeader();
+    const feed = document.getElementById('feedContainer');
+    const item = document.createElement('div');
+    item.className = 'feed-item';
+    item.innerHTML = `<div class="feed-meta"><strong>You</strong> • Just now</div><p>Reached <strong>${points} EcoPoints</strong> and diverted <strong>${waste} kg</strong> of waste! 🌍</p>`;
+    feed.prepend(item);
+    showToast('📣 Shared to Eco-Feed! +15 EcoPoints');
+  }
+
+  function switchTab(id, btn) {
+    document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+    btn.classList.add('active');
+  }
+</script>
+</body>
+</html>
